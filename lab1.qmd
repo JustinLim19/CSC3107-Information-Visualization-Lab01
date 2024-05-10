@@ -16,6 +16,7 @@ library(tidyverse)
 
 # Aggregating information about flights
 
+## 2.1
 ## Unzip Data and Import all Extracted CSV Files
 
 ```{r}
@@ -30,7 +31,8 @@ planes <- read_csv("planes.csv")
 weather <- read_csv("weather.csv")
 ```
 
-2.2
+## 2.2
+## Rankings of New York City’s Main Airports by Number of Destinations Served
 
 ```{r}
 # What are the rankings of New York City’s main airports in terms of the number of destinations served? Include columns for the following attributes in exactly this order: Three-letter airport code, Airport name, Number of destinations, Rank. The busiest airport is ranked first. Sort the results first by rank and, then, alphabetically by the three-letter airport code.
@@ -44,7 +46,8 @@ flights %>%
   rename("Three-letter airport code" = dest, "Airport name" = name, "Number of destinations" = n, Rank = rank)
 ```
 
-# 2.3
+## 2.3
+## Top Ten Destination Airports by Seats
 
 ```{r}
 #Which ten destination airports are served by the greatest number of seats from New York City? If airports are tied for the tenth place, ensure that all tied airports are included in the output. Include columns for the following attributes in exactly this order:
@@ -85,7 +88,8 @@ destination_copy
 
 ```
 
-# 2.4
+## 2.4
+## Top Ten Destination Airports Served by Flights from Each New York City Airport
 
 ```{r}
 #| message: false
@@ -103,19 +107,8 @@ flights |>
   select(origin, origin_name, dest, "dest_name" = name, min_rank, flights_count)
 ```
 
-# 2.6
-
-```{r}
-# What percentage of flights that experienced a departure delay of at least 30 minutes still managed to arrive on time? Remove flights with unknown departure or arrival delays from the analysis. Provide the answer as a single-element numeric vector. Confirm that the answer has the correct length and class.
-
-percentage_vector <- flights %>%
-  filter(!is.na(dep_delay), !is.na(arr_delay)) %>%
-  mutate(on_time = ifelse(arr_delay <= 0, 1, 0)) %>%
-  group_by(dep_delay >= 30) %>%
-  summarise(percentage = mean(on_time))
-```
-
-======= \# 2.5 Rankings of New York City’s Main Airports by Mean Departure Delay
+## 2.5 
+## Rankings of New York City’s Main Airports by Mean Departure Delay
 
 ```{r}
 # Filter flights with known departure delays
@@ -134,7 +127,21 @@ ranked_airports <- ranked_airports %>% left_join(airports, by = c("origin" = "fa
 print(ranked_airports)
 ```
 
-# 2.7
+## 2.6
+## Percentage of On-Time Flights Despite Departure Delay
+
+```{r}
+# What percentage of flights that experienced a departure delay of at least 30 minutes still managed to arrive on time? Remove flights with unknown departure or arrival delays from the analysis. Provide the answer as a single-element numeric vector. Confirm that the answer has the correct length and class.
+
+percentage_vector <- flights %>%
+  filter(!is.na(dep_delay), !is.na(arr_delay)) %>%
+  mutate(on_time = ifelse(arr_delay <= 0, 1, 0)) %>%
+  group_by(dep_delay >= 30) %>%
+  summarise(percentage = mean(on_time))
+```
+
+## 2.7
+## On-Time Departure Percentage by Hour of the Day
 
 ```{r}
 # Tabulate the percentage of on-time departures for each hour of the day when the plane is scheduled to leave. Remove flights with unknown departure delays from the analysis. Include columns for the following attributes in exactly this order:
@@ -155,7 +162,8 @@ flights_copy <- flights_copy %>% mutate(on_time = ifelse(dep_delay <= 0, 1, 0)) 
 flights
 ```
 
-# 2.8
+## 2.8
+## Planes Operated by Multiple Airlines
 
 ```{r}
 #| message: false
@@ -167,9 +175,24 @@ flights |>
   filter(airline_count > 0)
 ```
 
-# 3.2
+## 3.1 
+## Identify Chicago Airports
 
-## Filter airports with timezone America/New_York
+```{r}
+# Filter airports with names containing "Chicago"
+chicago_airports <- airports %>%
+  filter(str_detect(name, "Chicago"))
+
+# Select only the faa and name columns
+chicago_airports <- select(chicago_airports, faa, name)
+
+# Display the content of chicago_airports
+print(chicago_airports)
+```
+
+## 3.2
+## Airlines Serving Chicago from New York City
+### Filter airports with timezone America/New_York
 
 ```{r}
 # Which airlines operated flights from New York City to Chicago? Include columns for the following attributes in exactly this order:
@@ -184,7 +207,7 @@ nyc_airports <- airports %>%
   pull(faa)
 ```
 
-## Filter airports with timezone Chicago
+### Filter airports with timezone Chicago
 
 ```{r}
 chicago_airports <- airports %>%
@@ -192,7 +215,7 @@ chicago_airports <- airports %>%
   pull(faa)
 ```
 
-## Filter flights from New York City to Chicago and Rank Them
+### Filter flights from New York City to Chicago and Rank Them
 
 ```{r}
 flights %>%
@@ -205,33 +228,7 @@ flights %>%
   mutate(rank = row_number())
 ```
 
-# 4.1
-
-```{r}
-# How many unique combinations of origin airport and time_hour are present in flights.csv but absent from weather.csv? Provide your answer in the form of a single-element numeric vector. Confirm that the answer has the correct length and class.
-
-flights %>%
-  select(origin, time_hour) %>%
-  distinct() %>%
-  anti_join(weather, by = c("origin", "time_hour")) %>%
-  nrow()
-```
-
-# 3.1 Identify Chicago Airports
-
-```{r}
-# Filter airports with names containing "Chicago"
-chicago_airports <- airports %>%
-  filter(str_detect(name, "Chicago"))
-
-# Select only the faa and name columns
-chicago_airports <- select(chicago_airports, faa, name)
-
-# Display the content of chicago_airports
-print(chicago_airports)
-```
-
-# 3.6 Were There Daily Departures in October?
+## 3.6 Were There Daily Departures in October?
 
 ```{r}
 # Filter flights from New York City to Chicago in October 2013
@@ -255,3 +252,17 @@ print(at_least_one_daily_departure)
 print(length_check)
 print(class_check)
 ```
+
+## 4.1
+
+```{r}
+# How many unique combinations of origin airport and time_hour are present in flights.csv but absent from weather.csv? Provide your answer in the form of a single-element numeric vector. Confirm that the answer has the correct length and class.
+
+flights %>%
+  select(origin, time_hour) %>%
+  distinct() %>%
+  anti_join(weather, by = c("origin", "time_hour")) %>%
+  nrow()
+```
+
+
