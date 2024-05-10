@@ -4,6 +4,16 @@ author: "Gabriel Lau, Mirza Anaqi, Ryan Ong, Abdul Halim, Elroy Lian, Frederick 
 format: html
 editor: visual
 ---
+# Introduction
+
+```Your code chunk for loading libraries```
+```{r}
+#| message: false
+
+library(tidyverse)
+library(readr)
+library(dplyr)
+```
 
 # 2.1
 
@@ -56,7 +66,16 @@ destination <- destination %>% rename("Three-letter airport code" = dest, "Airpo
 destination
 
 ```
+# 2.6
+```{r}
+# What percentage of flights that experienced a departure delay of at least 30 minutes still managed to arrive on time? Remove flights with unknown departure or arrival delays from the analysis. Provide the answer as a single-element numeric vector. Confirm that the answer has the correct length and class.
 
+percentage_vector <- flights %>%
+  filter(!is.na(dep_delay), !is.na(arr_delay)) %>%
+  mutate(on_time = ifelse(arr_delay <= 0, 1, 0)) %>%
+  group_by(dep_delay >= 30) %>%
+  summarise(percentage = mean(on_time))
+```
 # 2.7
 
 ```{r}
@@ -76,4 +95,49 @@ flights <- flights %>% filter(!is.na(dep_delay))
 flights <- flights %>% mutate(on_time = ifelse(dep_delay <= 0, 1, 0)) %>% group_by(hour) %>% summarise(percentage_on_time = mean(on_time) * 100)
 
 flights
+```
+# 3.2
+
+## Filter airports with timezone America/New_York
+```{r}
+# Which airlines operated flights from New York City to Chicago? Include columns for the following attributes in exactly this order:
+# 
+# Two-letter airline code
+# Airline name
+# Number of flights
+# Rank. The airline operating most flights is ranked first.
+# Sort the results first by rank and, then, alphabetically by the two-letter airline code.
+nyc_airports <- airports %>%
+  filter(tzone == "America/New_York") %>%
+  pull(faa)
+```
+
+## Filter airports with timezone Chicago
+```{r}
+chicago_airports <- airports %>%
+  filter(tzone == "America/Chicago") %>%
+  pull(faa)
+```
+
+## Filter flights from New York City to Chicago and Rank Them
+```{r}
+flights %>%
+  filter(origin %in% nyc_airports, dest %in% chicago_airports) %>%
+  group_by(carrier) %>%
+  summarise(number_of_flights = n()) %>%
+  arrange(desc(number_of_flights), carrier) %>%
+  left_join(airlines, by = c("carrier" = "carrier")) %>%
+  select(carrier, name, number_of_flights) %>%
+  mutate(rank = row_number())
+```
+
+# 4.1
+```{r}
+# How many unique combinations of origin airport and time_hour are present in flights.csv but absent from weather.csv? Provide your answer in the form of a single-element numeric vector. Confirm that the answer has the correct length and class.
+
+flights %>%
+  select(origin, time_hour) %>%
+  distinct() %>%
+  anti_join(weather, by = c("origin", "time_hour")) %>%
+  nrow()
 ```
