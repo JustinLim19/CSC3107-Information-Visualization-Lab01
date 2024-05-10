@@ -5,15 +5,29 @@ format: html
 editor: visual
 ---
 
-# 2.1
+# Introduction
 
 ```{r}
+#| label: required-packages
+#| message: false
+
+library(tidyverse)
+```
+
+# Aggregating information about flights
+
+## Unzip Data and Import all Extracted CSV Files
+
+```{r}
+# unzip the data
+unzip("nycflights13_data.zip")
+
 # import csv
-airlines <- read_csv("nycflights13_data/airlines.csv")
-airports <- read_csv("nycflights13_data/airports.csv")
-flights <- read_csv("nycflights13_data/flights.csv")
-planes <- read_csv("nycflights13_data/planes.csv")
-weather <- read_csv("nycflights13_data/weather.csv")
+airlines <- read_csv("airlines.csv")
+airports <- read_csv("airports.csv")
+flights <- read_csv("flights.csv")
+planes <- read_csv("planes.csv")
+weather <- read_csv("weather.csv")
 ```
 
 # 2.3
