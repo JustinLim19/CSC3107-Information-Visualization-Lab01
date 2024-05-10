@@ -1,0 +1,78 @@
+---
+title: "lab1"
+format: html
+editor: visual
+---
+
+# 2.1
+
+```{r}
+# import csv
+airlines <- read_csv("nycflights13_data/airlines.csv")
+airports <- read_csv("nycflights13_data/airports.csv")
+flights <- read_csv("nycflights13_data/flights.csv")
+planes <- read_csv("nycflights13_data/planes.csv")
+weather <- read_csv("nycflights13_data/weather.csv")
+```
+
+# 2.3
+
+```{r}
+#Which ten destination airports are served by the greatest number of seats from New York City? If airports are tied for the tenth place, ensure that all tied airports are included in the output. Include columns for the following attributes in exactly this order:
+
+#Three-letter airport code
+#Airport name
+#Number of seats
+#Rank. The destination with most seats is ranked first.
+#Sort the results first by rank and, then, alphabetically by the three-letter airport code.
+
+# selecting the columns needed
+destination <- flights %>% select(dest, tailnum)
+planes <- planes %>% select(tailnum, seats)
+airports <- airports %>% select(faa, name)
+
+# join destination with planes to get the number of seats column
+destination <- left_join(destination, planes, by = "tailnum")
+
+# total number of seats for each destination
+destination <- destination %>% group_by(dest) %>% summarise(total_seats = sum(seats))
+
+# join destination with airports to get the airport name
+destination <- left_join(destination, airports, by = c("dest" = "faa"))
+
+# rank the destinations by the number of seats
+destination <- destination %>% arrange(desc(total_seats)) %>% mutate(rank = row_number())
+
+# select the top 10 destinations
+destination <- destination %>% filter(rank <= 10)
+
+# select the columns needed
+destination <- destination %>% select(dest, name, total_seats, rank)
+
+# rename the columns
+destination <- destination %>% rename("Three-letter airport code" = dest, "Airport name" = name, "Number of seats" = total_seats, "Rank" = rank)
+
+destination
+
+```
+
+# 2.7
+
+```{r}
+# Tabulate the percentage of on-time departures for each hour of the day when the plane is scheduled to leave. Remove flights with unknown departure delays from the analysis. Include columns for the following attributes in exactly this order:
+# 
+# Hour of the day
+# Percentage of on-time departures
+# Sort the results by the hour of the day. Display all hours in the output.
+
+# select the columns needed
+flights <- flights %>% select(hour, dep_delay)
+
+# remove flights with unknown departure delays
+flights <- flights %>% filter(!is.na(dep_delay))
+
+# calculate the percentage of on-time departures for each hour of the day
+flights <- flights %>% mutate(on_time = ifelse(dep_delay <= 0, 1, 0)) %>% group_by(hour) %>% summarise(percentage_on_time = mean(on_time) * 100)
+
+flights
+```
