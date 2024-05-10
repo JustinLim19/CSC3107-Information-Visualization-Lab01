@@ -30,6 +30,20 @@ planes <- read_csv("planes.csv")
 weather <- read_csv("weather.csv")
 ```
 
+2.2
+
+```{r}
+# What are the rankings of New York City’s main airports in terms of the number of destinations served? Include columns for the following attributes in exactly this order: Three-letter airport code, Airport name, Number of destinations, Rank. The busiest airport is ranked first. Sort the results first by rank and, then, alphabetically by the three-letter airport code.
+flights %>%
+  group_by(dest) %>%
+  summarise(n = n()) %>%
+  left_join(airports, by = c("dest" = "faa")) %>%
+  select(dest, name, n) %>%
+  mutate(rank = rank(desc(n))) %>%
+  arrange(rank, dest) %>%
+  rename("Three-letter airport code" = dest, "Airport name" = name, "Number of destinations" = n, Rank = rank)
+```
+
 # 2.3
 
 ```{r}
@@ -70,7 +84,28 @@ destination_copy <- destination_copy %>% rename("Three-letter airport code" = de
 destination_copy
 
 ```
+
+# 2.4
+
+```{r}
+#| label: required-packages
+#| message: false
+
+flights_dataset |> 
+  count(origin, dest, name = "flights_count") |> 
+  group_by(origin) |> 
+  mutate(
+    min_rank = min_rank(flights_count)
+  ) |> 
+  slice_min(order_by = min_rank, n = 10) |> 
+  inner_join(airports_dataset, by = c("origin" = "faa")) |> 
+  select(origin, "origin_name" = name, dest, min_rank, flights_count)  |>
+  inner_join(airports_dataset, by = c("dest" = "faa")) |> 
+  select(origin, origin_name, dest, "dest_name" = name, min_rank, flights_count)
+```
+
 # 2.6
+
 ```{r}
 # What percentage of flights that experienced a departure delay of at least 30 minutes still managed to arrive on time? Remove flights with unknown departure or arrival delays from the analysis. Provide the answer as a single-element numeric vector. Confirm that the answer has the correct length and class.
 
@@ -80,8 +115,9 @@ percentage_vector <- flights %>%
   group_by(dep_delay >= 30) %>%
   summarise(percentage = mean(on_time))
 ```
-=======
-# 2.5 Rankings of New York City’s Main Airports by Mean Departure Delay
+
+======= \# 2.5 Rankings of New York City’s Main Airports by Mean Departure Delay
+
 ```{r}
 # Filter flights with known departure delays
 filtered_flights <- flights %>% filter(!is.na(dep_delay))
@@ -119,9 +155,24 @@ flights <- flights %>% mutate(on_time = ifelse(dep_delay <= 0, 1, 0)) %>% group_
 
 flights
 ```
+
+# 2.8
+
+```{r}
+#| label: required-packages
+#| message: false
+
+flights_dataset |>
+  count(tailnum, carrier, name = "airline_count") |>
+  inner_join(planes_dataset, by = "tailnum") |>
+  select(tailnum, manufacturer, model, airline_count) |>
+  filter(airline_count > 0)
+```
+
 # 3.2
 
 ## Filter airports with timezone America/New_York
+
 ```{r}
 # Which airlines operated flights from New York City to Chicago? Include columns for the following attributes in exactly this order:
 # 
@@ -136,6 +187,7 @@ nyc_airports <- airports %>%
 ```
 
 ## Filter airports with timezone Chicago
+
 ```{r}
 chicago_airports <- airports %>%
   filter(tzone == "America/Chicago") %>%
@@ -143,6 +195,7 @@ chicago_airports <- airports %>%
 ```
 
 ## Filter flights from New York City to Chicago and Rank Them
+
 ```{r}
 flights %>%
   filter(origin %in% nyc_airports, dest %in% chicago_airports) %>%
@@ -155,6 +208,7 @@ flights %>%
 ```
 
 # 4.1
+
 ```{r}
 # How many unique combinations of origin airport and time_hour are present in flights.csv but absent from weather.csv? Provide your answer in the form of a single-element numeric vector. Confirm that the answer has the correct length and class.
 
