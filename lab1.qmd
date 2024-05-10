@@ -76,6 +76,25 @@ percentage_vector <- flights %>%
   group_by(dep_delay >= 30) %>%
   summarise(percentage = mean(on_time))
 ```
+=======
+# 2.5 Rankings of New York City’s Main Airports by Mean Departure Delay
+```{r}
+# Filter flights with known departure delays
+filtered_flights <- flights %>% filter(!is.na(dep_delay))
+
+# Calculate mean departure delay for each airport
+airport_delays <- filtered_flights %>% group_by(origin) %>% summarise(mean_dep_delay = mean(dep_delay))
+
+# Rank airports by mean departure delay
+ranked_airports <- airport_delays %>% mutate(rank = rank(mean_dep_delay)) %>% arrange(rank, origin)
+
+# Merge with airports data to get airport names
+ranked_airports <- ranked_airports %>% left_join(airports, by = c("origin" = "faa")) %>% select(origin, name, mean_dep_delay, rank) %>% arrange(rank, origin)
+
+# Display the ranked airports
+print(ranked_airports)
+```
+
 # 2.7
 
 ```{r}
@@ -140,4 +159,43 @@ flights %>%
   distinct() %>%
   anti_join(weather, by = c("origin", "time_hour")) %>%
   nrow()
+```
+
+# 3.1 Identify Chicago Airports
+
+```{r}
+# Filter airports with names containing "Chicago"
+chicago_airports <- airports %>%
+  filter(str_detect(name, "Chicago"))
+
+# Select only the faa and name columns
+chicago_airports <- select(chicago_airports, faa, name)
+
+# Display the content of chicago_airports
+print(chicago_airports)
+```
+
+# 3.6 Were There Daily Departures in October?
+
+```{r}
+# Filter flights from New York City to Chicago in October 2013
+october_flights <- flights %>%
+  filter(origin %in% c("JFK", "LGA", "EWR") & dest %in% c("ORD", "MDW") &
+           year == 2013 & month == 10)
+
+# Check if there were any daily departures
+daily_departures <- october_flights %>%
+  group_by(year, month, day) %>%
+  summarise(departures = n_distinct(flight))
+
+# Check if at least one departure was scheduled every day in October
+at_least_one_daily_departure <- all(daily_departures$departures > 0)
+length_check <- length(at_least_one_daily_departure) == 1
+class_check <- class(at_least_one_daily_departure) == "logical"
+
+# Display the result
+print(daily_departures)
+print(at_least_one_daily_departure)
+print(length_check)
+print(class_check)
 ```
