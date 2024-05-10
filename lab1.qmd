@@ -88,19 +88,18 @@ destination_copy
 # 2.4
 
 ```{r}
-#| label: required-packages
 #| message: false
 
-flights_dataset |> 
+flights |> 
   count(origin, dest, name = "flights_count") |> 
   group_by(origin) |> 
   mutate(
     min_rank = min_rank(flights_count)
   ) |> 
   slice_min(order_by = min_rank, n = 10) |> 
-  inner_join(airports_dataset, by = c("origin" = "faa")) |> 
+  inner_join(airports, by = c("origin" = "faa")) |> 
   select(origin, "origin_name" = name, dest, min_rank, flights_count)  |>
-  inner_join(airports_dataset, by = c("dest" = "faa")) |> 
+  inner_join(airports, by = c("dest" = "faa")) |> 
   select(origin, origin_name, dest, "dest_name" = name, min_rank, flights_count)
 ```
 
@@ -145,13 +144,13 @@ print(ranked_airports)
 # Sort the results by the hour of the day. Display all hours in the output.
 
 # select the columns needed
-flights <- flights %>% select(hour, dep_delay)
+flights_copy <- flights %>% select(hour, dep_delay)
 
 # remove flights with unknown departure delays
-flights <- flights %>% filter(!is.na(dep_delay))
+flights_copy <- flights_copy %>% filter(!is.na(dep_delay))
 
 # calculate the percentage of on-time departures for each hour of the day
-flights <- flights %>% mutate(on_time = ifelse(dep_delay <= 0, 1, 0)) %>% group_by(hour) %>% summarise(percentage_on_time = mean(on_time) * 100)
+flights_copy <- flights_copy %>% mutate(on_time = ifelse(dep_delay <= 0, 1, 0)) %>% group_by(hour) %>% summarise(percentage_on_time = mean(on_time) * 100)
 
 flights
 ```
@@ -159,12 +158,11 @@ flights
 # 2.8
 
 ```{r}
-#| label: required-packages
 #| message: false
 
-flights_dataset |>
+flights |>
   count(tailnum, carrier, name = "airline_count") |>
-  inner_join(planes_dataset, by = "tailnum") |>
+  inner_join(planes, by = "tailnum") |>
   select(tailnum, manufacturer, model, airline_count) |>
   filter(airline_count > 0)
 ```
