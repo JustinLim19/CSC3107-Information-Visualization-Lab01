@@ -1,5 +1,6 @@
 ---
 title: "lab1"
+author: "Gabriel Lau, Mirza Anaqi, Ryan Ong, Abdul Halim, Elroy Lian, Frederick Ang"
 format: html
 editor: visual
 ---
