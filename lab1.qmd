@@ -4,16 +4,6 @@ author: "Gabriel Lau, Mirza Anaqi, Ryan Ong, Abdul Halim, Elroy Lian, Frederick 
 format: html
 editor: visual
 ---
-# Introduction
-
-```Your code chunk for loading libraries```
-```{r}
-#| message: false
-
-library(tidyverse)
-library(readr)
-library(dplyr)
-```
 
 # Introduction
 
@@ -52,32 +42,32 @@ weather <- read_csv("weather.csv")
 #Sort the results first by rank and, then, alphabetically by the three-letter airport code.
 
 # selecting the columns needed
-destination <- flights %>% select(dest, tailnum)
-planes <- planes %>% select(tailnum, seats)
-airports <- airports %>% select(faa, name)
+destination_copy <- flights %>% select(dest, tailnum)
+planes_copy <- planes %>% select(tailnum, seats)
+airports_copy <- airports %>% select(faa, name)
 
 # join destination with planes to get the number of seats column
-destination <- left_join(destination, planes, by = "tailnum")
+destination_copy <- left_join(destination_copy, planes, by = "tailnum")
 
 # total number of seats for each destination
-destination <- destination %>% group_by(dest) %>% summarise(total_seats = sum(seats))
+destination_copy <- destination_copy %>% group_by(dest) %>% summarise(total_seats = sum(seats))
 
 # join destination with airports to get the airport name
-destination <- left_join(destination, airports, by = c("dest" = "faa"))
+destination_copy <- left_join(destination_copy, airports, by = c("dest" = "faa"))
 
 # rank the destinations by the number of seats
-destination <- destination %>% arrange(desc(total_seats)) %>% mutate(rank = row_number())
+destination_copy <- destination_copy %>% arrange(desc(total_seats)) %>% mutate(rank = row_number())
 
 # select the top 10 destinations
-destination <- destination %>% filter(rank <= 10)
+destination_copy <- destination_copy %>% filter(rank <= 10)
 
 # select the columns needed
-destination <- destination %>% select(dest, name, total_seats, rank)
+destination_copy <- destination_copy %>% select(dest, name, total_seats, rank)
 
 # rename the columns
-destination <- destination %>% rename("Three-letter airport code" = dest, "Airport name" = name, "Number of seats" = total_seats, "Rank" = rank)
+destination_copy <- destination_copy %>% rename("Three-letter airport code" = dest, "Airport name" = name, "Number of seats" = total_seats, "Rank" = rank)
 
-destination
+destination_copy
 
 ```
 # 2.6
