@@ -36,13 +36,13 @@ weather <- read_csv("weather.csv")
 
 ```{r}
 # What are the rankings of New York City’s main airports in terms of the number of destinations served? Include columns for the following attributes in exactly this order: Three-letter airport code, Airport name, Number of destinations, Rank. The busiest airport is ranked first. Sort the results first by rank and, then, alphabetically by the three-letter airport code.
-flights %>%
-  group_by(dest) %>%
-  summarise(n = n()) %>%
-  left_join(airports, by = c("dest" = "faa")) %>%
-  select(dest, name, n) %>%
-  mutate(rank = rank(desc(n))) %>%
-  arrange(rank, dest) %>%
+flights |>
+  group_by(dest) |>
+  summarise(n = n()) |>
+  left_join(airports, by = c("dest" = "faa")) |>
+  select(dest, name, n) |>
+  mutate(rank = rank(desc(n))) |>
+  arrange(rank, dest) |>
   rename("Three-letter airport code" = dest, "Airport name" = name, "Number of destinations" = n, Rank = rank)
 ```
 
@@ -58,33 +58,16 @@ flights %>%
 #Rank. The destination with most seats is ranked first.
 #Sort the results first by rank and, then, alphabetically by the three-letter airport code.
 
-# selecting the columns needed
-destination_copy <- flights %>% select(dest, tailnum)
-planes_copy <- planes %>% select(tailnum, seats)
-airports_copy <- airports %>% select(faa, name)
-
-# join destination with planes to get the number of seats column
-destination_copy <- left_join(destination_copy, planes, by = "tailnum")
-
-# total number of seats for each destination
-destination_copy <- destination_copy %>% group_by(dest) %>% summarise(total_seats = sum(seats))
-
-# join destination with airports to get the airport name
-destination_copy <- left_join(destination_copy, airports, by = c("dest" = "faa"))
-
-# rank the destinations by the number of seats
-destination_copy <- destination_copy %>% arrange(desc(total_seats)) %>% mutate(rank = row_number())
-
-# select the top 10 destinations
-destination_copy <- destination_copy %>% filter(rank <= 10)
-
-# select the columns needed
-destination_copy <- destination_copy %>% select(dest, name, total_seats, rank)
-
-# rename the columns
-destination_copy <- destination_copy %>% rename("Three-letter airport code" = dest, "Airport name" = name, "Number of seats" = total_seats, "Rank" = rank)
-
-destination_copy
+flights |>
+  inner_join(planes, by = "tailnum") |>
+  group_by(dest) |>
+  summarise(total_seats = sum(seats)) |>
+  inner_join(airports, by = c("dest" = "faa")) |>
+  mutate(rank = rank(desc(total_seats))) |>
+  arrange(rank, dest) |>
+  select(dest, name, total_seats, rank) |>
+  rename("Three-letter airport code" = dest, "Airport name" = name, "Number of seats" = total_seats, Rank = rank)
+  
 
 ```
 
@@ -150,16 +133,13 @@ percentage_vector <- flights %>%
 # Percentage of on-time departures
 # Sort the results by the hour of the day. Display all hours in the output.
 
-# select the columns needed
-flights_copy <- flights %>% select(hour, dep_delay)
-
-# remove flights with unknown departure delays
-flights_copy <- flights_copy %>% filter(!is.na(dep_delay))
-
-# calculate the percentage of on-time departures for each hour of the day
-flights_copy <- flights_copy %>% mutate(on_time = ifelse(dep_delay <= 0, 1, 0)) %>% group_by(hour) %>% summarise(percentage_on_time = mean(on_time) * 100)
-
-flights
+flights |>
+  filter(!is.na(dep_delay)) |>
+  mutate(on_time = ifelse(dep_delay <= 0, 1, 0)) |>
+  group_by(hour) |>
+  summarise(percentage_on_time = mean(on_time) * 100) |>
+  arrange(hour) |>
+  rename("Hour of the day" = hour, "Percentage of on-time departures" = percentage_on_time)
 ```
 
 ## 2.8
@@ -228,7 +208,30 @@ flights %>%
   mutate(rank = row_number())
 ```
 
-## 3.6 Were There Daily Departures in October?
+## 3.4
+## Top Ten Models by Frequency
+
+```{r}
+# What were the ten most frequent combinations of manufacturer and model used for flights from New York City to Chicago? If manufacturer-model combinations are tied for the tenth place, incorporate all of them in the output. Include columns for the following attributes in exactly this order:
+# 
+# Manufacturer
+# Model
+# Number of flights
+# Rank
+# Sort the results first by rank, then alphabetically by manufacturer, and, lastly, by model.
+
+flights |>
+  inner_join(planes, by = "tailnum") |>
+  filter(origin %in% nyc_airports, dest %in% chicago_airports) |>
+  group_by(manufacturer, model) %>% summarise(number_of_flights = n()) |>
+  mutate(rank = rank(desc(number_of_flights))) |>
+  arrange(rank, manufacturer, model) |>
+  slice_min(order_by = rank, n = 10) |>
+  rename("Manufacturer" = manufacturer, "Model" = model, "Number of flights" = number_of_flights, Rank = rank)
+```
+
+## 3.6 
+## Were There Daily Departures in October?
 
 ```{r}
 # Filter flights from New York City to Chicago in October 2013
