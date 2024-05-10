@@ -42,6 +42,20 @@ planes <- read_csv("planes.csv")
 weather <- read_csv("weather.csv")
 ```
 
+2.2
+
+```{r}
+# What are the rankings of New York City’s main airports in terms of the number of destinations served? Include columns for the following attributes in exactly this order: Three-letter airport code, Airport name, Number of destinations, Rank. The busiest airport is ranked first. Sort the results first by rank and, then, alphabetically by the three-letter airport code.
+flights %>%
+  group_by(dest) %>%
+  summarise(n = n()) %>%
+  left_join(airports, by = c("dest" = "faa")) %>%
+  select(dest, name, n) %>%
+  mutate(rank = rank(desc(n))) %>%
+  arrange(rank, dest) %>%
+  rename("Three-letter airport code" = dest, "Airport name" = name, "Number of destinations" = n, Rank = rank)
+```
+
 # 2.3
 
 ```{r}
